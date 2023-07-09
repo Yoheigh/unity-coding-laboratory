@@ -8,12 +8,22 @@ public class StickCategoryUI : MonoBehaviour
     public float DefaultX = 0f;
     public float DefaultY = 0f;
     public float DefaultRadian = 30f;
+    public float Offset = 20f;
+
+    public GameObject UIElement;
+    public GameObject Canvas;
 
     // 내부 변수
     private int tempCount;
     private int CountLimit = 33;
 
     private List<GameObject> objects = new List<GameObject>();
+
+    private void Start()
+    {
+        DefaultX = Camera.main.pixelWidth / 2;
+        DefaultY = Camera.main.pixelHeight / 2;
+    }
 
     void Update()
     {
@@ -30,11 +40,12 @@ public class StickCategoryUI : MonoBehaviour
             for (int i = 0; i < ObjectCount; i++)
             {
                 float angle = i * 2 * Mathf.PI / ObjectCount; // 라디안 단위의 각도 계산
-                float startX = DefaultX + DefaultRadian * Mathf.Cos(angle);
-                float startY = DefaultY + DefaultRadian * Mathf.Sin(angle);
+                Debug.Log($"{i}번째 : {angle * Mathf.Rad2Deg}");
+                float startX = DefaultX + DefaultRadian * Mathf.Cos(angle + (Offset * Mathf.Deg2Rad));
+                float startY = DefaultY + DefaultRadian * Mathf.Sin(angle + (Offset * Mathf.Deg2Rad));
 
-                GameObject uiObj = Instantiate(new GameObject(), new Vector3(startX, startY, 0f), Quaternion.identity);
-                uiObj.name = $"{ObjectCount}번째 오브젝트";
+                var uiObj = Instantiate<GameObject>(UIElement, new Vector3(startX, startY, 0f), Quaternion.identity, Canvas.transform);
+                uiObj.name = $"{i}번째 오브젝트";
                 objects.Add(uiObj);
             }
 

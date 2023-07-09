@@ -27,7 +27,7 @@ public class CustomStick : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine("TestCO");
+        // StartCoroutine("TestCO");
     }
 
     void Update()
