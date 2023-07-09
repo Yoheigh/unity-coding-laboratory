@@ -81,8 +81,6 @@ public class PlayerMovement : MonoBehaviour
     public int animIDMotionSpeed;
 
     private CharacterController characterController;
-    private PlayerController controller;
-    private CustomInput input;
 
     public GameObject MainCamera;
     public Animator animator;
@@ -94,8 +92,6 @@ public class PlayerMovement : MonoBehaviour
 
         characterController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
-        controller = GetComponent<PlayerController>();
-        input = FindObjectOfType<CustomInput>().GetComponent<CustomInput>();
 
         AssignAnimationIDs();
         fallTimeoutDelta = FallTimeout;
@@ -133,25 +129,6 @@ public class PlayerMovement : MonoBehaviour
 
         isGround = Physics.CheckSphere(spherePosition, GroundCheckRadius, GroundLayers,
             QueryTriggerInteraction.Ignore);
-
-        //isGround = verticalVelocity > -1.1f;
-
-        //Physics.Raycast(new Ray(spherePosition, Vector3.down));
-
-        //var temp = Physics.OverlapSphere(spherePosition, GroundCheckRadius, GroundLayers, QueryTriggerInteraction.Ignore);
-
-        //for (int i = 0; i < temp.Length; i++)
-        //{
-        //    var tempbool = temp[i].TryGetComponent<TriggerObject>(out var triggerObj);
-
-        //    if(tempbool == true)
-        //        triggerObj.PlayerEntered(controller);
-        //}
-
-        //if (_hasAnimator)
-        //{Physics.OverlapSphere(spherePosition, GroundCheckRadius, GroundLayers, QueryTriggerInteraction.Ignore);
-        //    _animator.SetBool(_animIDGrounded, Grounded);
-        //}
     }
 
     // State에서 벗어났을 때 낙하 데미지를 입는지
@@ -159,7 +136,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if(isFallDamageActivated)
         {
-            controller.Hit();
+            //controller.Hit();
             isFallDamageActivated = false;
         }
     }
@@ -234,170 +211,17 @@ public class PlayerMovement : MonoBehaviour
         }
         else // 추락 시작
         {
-            controller.ChangeState(PlayerStateType.Falling);
+           
         }
     }
     
     // WASD 조작
     public void Move()
     {
-        float targetSpeed = input.sprint ? SprintSpeed : MoveSpeed;
 
-        if (input.move == Vector2.zero)
-        {
-            targetSpeed = 0.0f;
-
-            if (slipperySpeed > 0.0f)
-                slipperySpeed -= FrictionSpeed * Time.deltaTime;
-            else if (slipperySpeed < 0.0f)
-                slipperySpeed = 0.0f;
-        }
-        else
-        {
-            if (slipperySpeed <= targetSpeed)
-                slipperySpeed += targetSpeed * FrictionSpeed * Time.deltaTime;
-        }
-
-        Vector3 moveDir = new Vector3(input.move.x, 0, input.move.y);
-        float inputMagnitude = input.move.magnitude;
-
-        Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
-
-        animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
-
-        if (animationBlend < 0.01f) animationBlend = 0f;
-
-        if (input.move != Vector2.zero)
-        {
-            targetRotation = Mathf.Atan2(moveDir.x, moveDir.z) * Mathf.Rad2Deg +
-                              MainCamera.transform.eulerAngles.y;
-            float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
-                    RotationSmoothTime);
-
-            transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
-        }
-
-        if (isSlippery)
-            // targetDirection 값에 따라 방향이 바뀌므로 미끄러지려면 수정 필요
-            characterController.Move(targetDirection * (slipperySpeed * Time.deltaTime));
-
-        else
-            characterController.Move(targetDirection * (targetSpeed * Time.deltaTime));
-
-        // 아 이런 미친 forceVector 어따가 더해야 해
-        // slippery도 음 리팩토링 나중에 레벨디자인때 합시다
-
-        //transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * 20f);
-        // t_n =  (t - min)/(max - min)
-
-        animator.SetFloat(animIDSpeed, animationBlend);
-        animator.SetFloat(animIDMotionSpeed, inputMagnitude);
+        //animator.SetFloat(animIDSpeed, animationBlend);
+        //animator.SetFloat(animIDMotionSpeed, inputMagnitude);
     }
-
-    public void MoveHolding(InteractionObject _DragableObject)
-    {
-        // 플레이어와 오브젝트 간의 거리를 비교
-        // Vector3 distanceVec = characterController.transform.position - _DragableObject.transform.position;
-
-        if (_DragableObject == null)
-            controller.ChangeState(PlayerStateType.Default);
-
-        float targetSpeed = MoveSpeed / 2;
-
-        if (input.move == Vector2.zero)
-        {
-            targetSpeed = 0.0f;
-        }
-
-        // Vector3 moveDir = new Vector3(input.move.x, 0, input.move.y);
-        float inputMagnitude = input.move.magnitude;
-
-        Vector3 targetDirection = transform.forward * input.move.y; 
-
-        // animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * speedChangeRate);
-        animationBlend = input.move.y;
-
-        //if (animationBlend < 0.01f) animationBlend = 0f;
-
-        //if (input.move != Vector2.zero)
-        //{
-        //    targetRotation = Mathf.Atan2(moveDir.x, moveDir.z) * Mathf.Rad2Deg +
-        //                      MainCamera.transform.eulerAngles.y;
-        //}
-
-        characterController.Move(targetDirection * (targetSpeed * Time.deltaTime) +
-                               new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
-
-        _DragableObject.transform.position += targetDirection * (targetSpeed * Time.deltaTime);
-
-        //transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * 20f);
-        // t_n =  (t - min)/(max - min)
-
-        animator.SetFloat(animIDHoldMove, animationBlend);
-        animator.SetFloat(animIDMotionSpeed, inputMagnitude);
-    }
-
-    public void SetVerticalPoint(Vector3 _pivot, float _maxReachPoint)
-    {
-        lastPos = _pivot;
-        currentPos = _pivot;
-        maxReachPoint = _maxReachPoint;
-        transform.position = _pivot;
-    }
-
-    public void SnapToVerticalPoint()
-    {
-        transform.position = new Vector3(lastPos.x, verticalSnap, lastPos.z);
-    }
-
-    public void MoveVertical(InteractionObject _ladderObj) // Vector3 _startPos, float _maxReachPoint 이러헥 쓰고 싶었는데
-    {
-        if (_ladderObj == null)
-            controller.ChangeState(PlayerStateType.Falling);
-
-        float targetSpeed = MoveSpeed;
-
-        if (input.move == Vector2.zero)
-        {
-            targetSpeed = 0.0f;
-        }
-
-        if (currentPos.y > lastPos.y + maxReachPoint)
-            controller.ChangeState(PlayerStateType.Default);
-
-        else if (currentPos.y <= lastPos.y - 0.3f)
-            controller.ChangeState(PlayerStateType.Default);
-
-        //Vector3 moveDir = new Vector3(input.move.x, 0, input.move.y);
-
-        float inputMagnitude = input.move.magnitude;
-
-        Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) *
-                                    new Vector3(0.0f, input.move.y, 0.0f);
-
-        animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
-
-        if (animationBlend < 0.01f) animationBlend = 0f;
-
-        //if (input.move != Vector2.zero)
-        //{
-        //    targetRotation = Mathf.Atan2(moveDir.x, moveDir.z) * Mathf.Rad2Deg +
-        //                      MainCamera.transform.eulerAngles.y;
-        //
-
-        //characterController.Move(targetDirection * (targetSpeed * Time.deltaTime));
-        transform.position += targetDirection * targetSpeed * Time.deltaTime;
-        currentPos.y += input.move.y * targetSpeed * Time.deltaTime;
-
-        //transform.position = new Vector3(lastPos.x, transform.position.y, lastPos.z);
-
-        //transform.forward = Vector3.Slerp(transform.forward, moveDir, Time.deltaTime * 20f);
-        // t_n =  (t - min)/(max - min)
-
-        animator.SetFloat(animIDSpeed, animationBlend);
-        animator.SetFloat(animIDMotionSpeed, inputMagnitude);
-    }
-
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

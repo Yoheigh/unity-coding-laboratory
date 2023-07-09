@@ -25,7 +25,6 @@ public class PlayerInteraction : MonoBehaviour
 
     [SerializeField]
     private FOVSystem fov;
-    private PlayerController controller;
 
     private bool isBuildMode = false;
 
@@ -36,8 +35,6 @@ public class PlayerInteraction : MonoBehaviour
     public void Setup()
     {
         // fov = GetComponent<FOVSystem>();
-        controller = GetComponent<PlayerController>();
-
         Debug.Log($"Setup - {this}");
     }
 
@@ -59,13 +56,9 @@ public class PlayerInteraction : MonoBehaviour
                 case ObjectType.Grabable:
                     // controller.anim.ChangeAnimationState("Throw");
                     // 던지기 코드 처리
-                    /* 지금은 그냥 보여주기용 */
-                    controller.animator.SetBool("isLifting", false);
-                    ReleaseGrabable(interactionObj);
                     break;
 
                 case ObjectType.Dragable:
-                    controller.ChangeState(PlayerStateType.Default);
                     break;
             }
 
@@ -89,24 +82,20 @@ public class PlayerInteraction : MonoBehaviour
         if (fov.ClosestTransform.TryGetComponent(out InteractionObject temp))
         {
             // 오브젝트의 인터랙션 기능이 있으면 활성화
-            temp.InteractWithPlayer(controller);
+            // temp.InteractWithPlayer(controller);
 
             // 오브젝트의 enum에 따라서 플레이어 상태 변경
             switch (temp.ObjectType)
             {
                 case ObjectType.Grabable:
                     interactionObj = temp;
-                    controller.animator.SetBool("isLifting", true);
-                    StartCoroutine(ObjectMoveToOverhead(interactionObj));
                     break;
 
                 case ObjectType.Dragable:
                     interactionObj = temp;
-                    StartCoroutine(GrabDragable((Dragable)interactionObj));
                     break;
 
                 case ObjectType.Pickup:
-                    StartCoroutine(PickUpDelay());
                     break;
 
                 case ObjectType.StageObject:
