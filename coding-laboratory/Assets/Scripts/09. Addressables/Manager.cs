@@ -1,32 +1,52 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
-    private Manager() { }
-    public static Manager Instance { get; private set; }
+    private static Manager instance;
+    public static Manager Instance { get { Init(); return instance; } }
 
     public PoolManager Pool = new PoolManager();
     public ResourceManager Resource = new ResourceManager();
     public ObjectManager Object = new ObjectManager();
     public UITest UI;
+    public CoroutineManager Co;
 
-    private void Awake()
+    [RuntimeInitializeOnLoadMethod]
+    private static void Init()
     {
-        if (Instance != null)
+        if (instance == null)
         {
-            Destroy(gameObject);
-            return;
-        }
-        else
-        {
-            transform.parent = null;
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
+            GameObject go = GameObject.Find("@Managers");
+            if(go == null)
+            {
+                go = new GameObject("@Managers");
+                go.AddComponent<Manager>();
+            }
 
+            instance = go.GetComponent<Manager>();
+            DontDestroyOnLoad(go);
+        }
+    }
+
+    //private static void MonoInit<T>() where T : UnityEngine.Component
+    //{
+    //    T monoInstance = new GameObject($"@{typeof(T)}").AddComponent<T>();
+
+    //    var _instance = monoInstance.GetComponent<T>();
+    //    DontDestroyOnLoad(monoInstance.gameObject);
+
+    //    return _instance;
+    //}
+
+    private void Start()
+    {
         // °øºÎ¿ë
-        UI.Init();
+        // UI.Init();
+        // Co = MonoInit<CoroutineManager>();
+        Debug.Log(CoroutineManager.Instance);
     }
 }

@@ -290,7 +290,7 @@ public class DialogSystem : MonoBehaviour
             }                       
             else if (dialogs[currentDialogIndex].nextScene.CompareTo("None") != 0)
             {
-                SceneManager.LoadScene(dialogs[currentDialogIndex].nextScene);
+                // SceneManager.LoadScene(dialogs[currentDialogIndex].nextScene);
             }
             else if (dialogs[currentDialogIndex].nextindex != -100)
             {
