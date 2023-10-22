@@ -23,6 +23,7 @@ public class Question02 : MonoBehaviour
     int[] itemPropertyInputsInt;
 
     private int x;
+    private int currentX;
     private int itemCount;
 
     const int speed = 1;
@@ -30,7 +31,8 @@ public class Question02 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        baseInputsInt = StringArrayToIntArray(baseInputs);
+        itemPropertyInputsInt = StringArrayToIntArray(itemPropertyInputs);
     }
 
     public int[] StringArrayToIntArray(string[] strings)
@@ -48,7 +50,6 @@ public class Question02 : MonoBehaviour
                 return null;
             }
         }
-
         return toInts;
     }
 
@@ -75,13 +76,8 @@ public class Question02 : MonoBehaviour
         // itemProperty
         for (int i = 0, length = itemPropertyInputs.Length; i < length; i++)
         {
-            int[] itemProperty = itemPropertyInputs[i].Split(' ');
+            int[] itemProperty = StringArrayToIntArray(itemPropertyInputs[i].Split(' '));
             // 예외처리 필요
-
-            int a;  // 신발이 생성되기까지의 시간
-            int b;  // 신발을 장착하기까지의 시간
-            int c;  // 신발의 지속시간
-            int d;  // 신발의 c초동안 달릴 수 있는 속도
 
             //for (int j = 0; j < 4; j++)
             //{
@@ -96,7 +92,5 @@ public class Question02 : MonoBehaviour
         int b = itemProperty[1]; // 신발을 장착하기까지의 시간
         int c = itemProperty[2]; // 신발의 지속시간
         int d = itemProperty[3];  // 신발의 c초동안 달릴 수 있는 속도
-
-
     }
 }
